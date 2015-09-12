@@ -1,5 +1,9 @@
 # Remote Deployment Trigger for [PHPCI](https://www.phptesting.org)
 
+[![Build Status](https://travis-ci.org/rephluX/phpci-remote-deployment.svg?branch=master)](https://travis-ci.org/rephluX/phpci-remote-deployment)
+[![Latest Stable Version](https://poser.pugx.org/rephlux/phpci-remote-deployment/v/stable.svg)](https://packagist.org/packages/rephlux/phpci-remote-deployment)
+[![License](https://poser.pugx.org/rephlux/phpci-remote-deployment/license.svg)](https://packagist.org/packages/rephlux/phpci-remote-deployment)
+
 A plugin for PHPCI to trigger an deployment url.
 
 To deploy an application when the build is successful tested, specify any external remote deployment url trigger the deployment process.
