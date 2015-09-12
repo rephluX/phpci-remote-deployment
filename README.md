@@ -28,7 +28,7 @@ To deploy an application when the build is successful tested, specify any extern
 example:
 
 ```yml
-setup:
+success:
     \Rephlux\PHPCI\Plugin\RemoteDeployment: 
         url: "http://deploy.mydomain.com/execute?token=123456789"
 
