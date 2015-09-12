@@ -1,0 +1,39 @@
+{
+    "name": "rephlux/phpci-remote-deployment",
+    "description": "A PHPCI plugin to trigger a remote deployment url after an successful build",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chris van Daele",
+            "email": "engine_no9@gmx.net",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "curl/curl": "^1.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rephlux\\PHPCI\\Plugin\\": "src"
+        }
+    },
+    "config": {
+        "preferred-install": "dist"
+    },
+    "extra": {
+        "phpci": {
+            "pluginNamespace": "Rephlux\\PHPCI\\Plugin\\",
+            "suppliedPlugins": [
+                {
+                    "name": "RemoteDeployment",
+                    "class": "RemoteDeployment"
+                }
+            ]
+        }
+    }
+}
