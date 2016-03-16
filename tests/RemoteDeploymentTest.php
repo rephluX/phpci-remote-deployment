@@ -52,6 +52,10 @@ class RemoteDeploymentTest extends PHPUnit_Framework_TestCase
         $this->buildMock
             ->method('isSuccessful')
             ->willReturn(true);
+
+        $this->buildMock
+            ->method('getBranch')
+            ->willReturn('master');
     }
 
     /**
@@ -80,10 +84,34 @@ class RemoteDeploymentTest extends PHPUnit_Framework_TestCase
      */
     public function testPluginCanBeInstantiated()
     {
-        $options = ['url' => $this->url, 'method' => 'get'];
-        $plugin  = $this->getPlugin($options);
+        $options = [
+            'master' => [
+                'url'    => $this->url,
+                'method' => 'get'
+            ]
+        ];
+
+        $plugin = $this->getPlugin($options);
 
         $this->assertInstanceOf('Rephlux\PHPCI\Plugin\RemoteDeployment', $plugin);
+    }
+
+    /**
+     * Ensure that the plugin can not be instantiated with a missing env path.
+     *
+     * @expectedException Exception
+     * @expectedExceptionMessage No configuration found
+     */
+    public function testPluginCanNotBeInstantiatedWithInvalidBranch()
+    {
+        $options = [
+            'development' => [
+                'url'    => $this->url,
+                'method' => 'get'
+            ]
+        ];
+
+        $this->getPlugin($options);
     }
 
     /**
@@ -94,7 +122,7 @@ class RemoteDeploymentTest extends PHPUnit_Framework_TestCase
      */
     public function testPluginCanNotBeInstantiatedWithMissingUrl()
     {
-        $options = [];
+        $options = ['master' => []];
 
         $this->getPlugin($options);
     }
@@ -107,7 +135,11 @@ class RemoteDeploymentTest extends PHPUnit_Framework_TestCase
      */
     public function testPluginCanNotBeInstantiatedWithInvalidUrl()
     {
-        $options = ['url' => '%'];
+        $options = [
+            'master' => [
+                'url' => '%'
+            ]
+        ];
 
         $this->getPlugin($options);
     }
@@ -120,7 +152,12 @@ class RemoteDeploymentTest extends PHPUnit_Framework_TestCase
      */
     public function testPluginCanNotBeInstantiatedWithInvalidMethodType()
     {
-        $options = ['url' => $this->url, 'method' => 'delete'];
+        $options = [
+            'master' => [
+                'url'    => $this->url,
+                'method' => 'delete'
+            ]
+        ];
 
         $this->getPlugin($options);
     }
@@ -157,8 +194,15 @@ class RemoteDeploymentTest extends PHPUnit_Framework_TestCase
                  ->method($method)
                  ->with($url);
 
+        $options = [
+            'master' => [
+                'url'    => $url,
+                'method' => $method
+            ]
+        ];
+
         $plugin = $this->getMockBuilder('Rephlux\PHPCI\Plugin\RemoteDeployment')
-                       ->setConstructorArgs([$this->builderMock, $this->buildMock, ['url' => $url, 'method' => $method]])
+                       ->setConstructorArgs([$this->builderMock, $this->buildMock, $options])
                        ->setMethods(['getCurl'])
                        ->getMock();
 

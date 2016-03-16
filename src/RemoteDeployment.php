@@ -47,6 +47,11 @@ class RemoteDeployment implements Plugin, ZeroConfigPlugin
     protected $requestMethod = 'GET';
 
     /**
+     * @var string $branch The name for the selected branch
+     */
+    protected $branch;
+
+    /**
      * @var array $validRequestMethods Allowed request to request the remote deploy url.
      */
     protected $validRequestMethods = ['GET', 'POST'];
@@ -71,8 +76,9 @@ class RemoteDeployment implements Plugin, ZeroConfigPlugin
 
     /**
      * Standard Constructor
-     * $options['url']      Trigger URL.
-     * $options['method']   Method to call the trigger url with. Default: GET
+     *
+     * $options[<branch>]['url']      Trigger URL.
+     * $options[<branch>]['method']   Method to call the trigger url with. Default: GET
      *
      * @param Builder $phpci
      * @param Build $build
@@ -82,8 +88,9 @@ class RemoteDeployment implements Plugin, ZeroConfigPlugin
      */
     public function __construct(Builder $phpci, Build $build, array $options = [])
     {
-        $this->phpci = $phpci;
-        $this->build = $build;
+        $this->phpci  = $phpci;
+        $this->build  = $build;
+        $this->branch = $this->build->getBranch();
 
         $this->deployUrl     = $this->getDeploymentUrl($options);
         $this->requestMethod = $this->getDeploymentMethod($options);
@@ -125,15 +132,19 @@ class RemoteDeployment implements Plugin, ZeroConfigPlugin
      */
     protected function getDeploymentUrl(array $options)
     {
-        if (!is_array($options) || !isset($options['url'])) {
+        if (!is_array($options) || !isset($options[$this->branch])) {
+            throw new \Exception('No configuration found for the ' . $this->branch . ' branch!');
+        }
+
+        if (!is_array($options[$this->branch]) || !isset($options[$this->branch]['url'])) {
             throw new \Exception('Please define a deployment url for remote deployment!');
         }
 
-        if (filter_var($options['url'], FILTER_VALIDATE_URL) === false) {
+        if (filter_var($options[$this->branch]['url'], FILTER_VALIDATE_URL) === false) {
             throw new \Exception('Please define a valid deployment url for remote deployment!');
         }
 
-        return trim($options['url']);
+        return trim($options[$this->branch]['url']);
     }
 
     /**
@@ -146,8 +157,8 @@ class RemoteDeployment implements Plugin, ZeroConfigPlugin
      */
     protected function getDeploymentMethod(array $options)
     {
-        if (isset($options['method'])) {
-            $this->requestMethod = strtoupper($options['method']);
+        if (isset($options[$this->branch]['method'])) {
+            $this->requestMethod = strtoupper($options[$this->branch]['method']);
         }
 
         if (!in_array($this->requestMethod, $this->validRequestMethods)) {
@@ -170,7 +181,12 @@ class RemoteDeployment implements Plugin, ZeroConfigPlugin
         $curl = $this->getCurl();
 
         $this->phpci->log(
-            sprintf('Calling remote deployment url %s with method (%s)', $deployUrl, $method)
+            sprintf(
+                'Calling remote deployment url %s with method (%s) on the %s branch',
+                $deployUrl,
+                $method,
+                $this->branch
+            )
         );
 
         if ($method == 'GET') {
